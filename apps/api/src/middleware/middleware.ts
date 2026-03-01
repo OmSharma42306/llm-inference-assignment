@@ -1,10 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
-import { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 
 interface authRequest extends Request{
     userId? : string;
 }
+
+const jwt_secret : string = process.env.jwt_secret || '';
 
 export function AuthMiddleware(req:authRequest,res:Response,next:NextFunction){
     const authHeaders = req.headers["authorization"];
@@ -18,7 +20,8 @@ export function AuthMiddleware(req:authRequest,res:Response,next:NextFunction){
     const token : any= authHeaders?.split(' ')[1];
     console.log(token);
     try{
-        const decodedToken : any = verify(token,'dew');
+        const decodedToken : any = jwt.verify(token,jwt_secret);
+        console.log("decoded token",decodedToken);
         req.userId = decodedToken.userId;
         next();
     }catch(error){
