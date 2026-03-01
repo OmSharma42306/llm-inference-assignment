@@ -7,7 +7,7 @@ interface authRequest extends Request{
 }
 
 const jwt_secret : string = process.env.jwt_secret || '';
-
+console.log('ddd',jwt_secret);
 export function AuthMiddleware(req:authRequest,res:Response,next:NextFunction){
     const authHeaders = req.headers["authorization"];
     

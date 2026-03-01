@@ -3,17 +3,21 @@ import {SignInSchema,SignUpScheama} from "@repo/common";
 import { Users } from "@repo/db";
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
-const jwt_secret : string = process.env.jwt_secret || '';
+if (!process.env.jwt_secret) {
+  throw new Error("JWT_SECRET not configured");
+}
+const jwt_secret : string = process.env.jwt_secret as string;
 const router = express.Router();
 
 router.post('/signup',async (req:Request,res:Response)=>{
     try{
         const { success } = SignUpScheama.safeParse(req.body);
         if(!success){
-            res.status(300).json({ msg : 'Invalid Data!'});
+            res.status(400).json({ msg : 'Invalid Data!'});
             return;
         }
 
@@ -24,19 +28,20 @@ router.post('/signup',async (req:Request,res:Response)=>{
             res.status(409).json({msg : "user already exists! log in.." });
             return;
         } 
+        const hashedPassword = await bcrypt.hash(password,10);
 
         const newUser = await Users.create({
             name : name,
             email : email,
-            password : password
+            password : hashedPassword
         });
         
         await newUser.save();
-        res.status(200).json({ msg : "SignUp Succesful! Log in.."});
+        res.status(201).json({ msg : "SignUp Succesful! Log in.."});
         return;
 
     }catch(error){
-        res.status(400).json({ msg : error});
+        res.status(500).json({ msg : "Internal Server Error" });
         return;
     }
 });
@@ -60,17 +65,19 @@ router.post('/signin',async(req:Request,res:Response)=>{
             return;
         }
 
-        if (existingUser.password !== password) {
-            return res.status(400).json({ msg: "Invalid Credentials.!" });
+        const isValid = await bcrypt.compare(password,existingUser.password);
+
+        if (!isValid) {
+            return res.status(401).json({ msg: "Invalid Credentials.!" });
         }
 
-        const token = jwt.sign({ userId: existingUser.id }, jwt_secret);
+        const token = jwt.sign({ userId: existingUser.id }, jwt_secret,{expiresIn : "15m"});
 
         res.status(200).json({ authToken: token, msg: "Login Successful!" });
     
         return;
     }catch(error){
-        res.status(400).json({ msg : error});
+        res.status(400).json({ msg : "Internal Server Error" });
         return;
     }   
 })
