@@ -1,10 +1,12 @@
-import express, { response, type Request, type Response } from "express";
+import express, { type Request, type Response } from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/auth.js";
 import inferenceRoutes from "./routes/chat.js";
 import { connectDb } from "./connectDb.js";
 import { getMetrics } from "./metrics-service/metrics.service.js";
+import { warmup } from "./warmup-model/warmup-model.js";
 
+warmup();
 dotenv.config();
 
 const app = express();
@@ -15,6 +17,7 @@ connectDb();
 app.use(express.json());
 app.use('/user',userRoutes);
 app.use('/inference',inferenceRoutes);
+
 
 app.get('/metrics',(req:Request,res:Response)=>{
     res.json(getMetrics());
