@@ -2,8 +2,9 @@ import type { Request,Response } from "express";
 import { Router } from "express";
 import { AuthMiddleware } from "../middleware/middleware.js";
 import { inferenceRateLimiter } from "../rateLimiter.js";
-import ollama from "ollama";
+import { ollama } from "../ollamaConfig.js"
 import { recordLatency } from "../metrics-service/metrics.service.js";
+
 const router = Router();
 
 interface authRequest extends Request{
@@ -14,10 +15,10 @@ router.post('/v1/infer',AuthMiddleware,inferenceRateLimiter,async(req:authReques
     try{
         const prompt = req.body.prompt;
         if(!prompt) return res.status(400).json({ msg : "prompt not given!"});
-        
+        console.log("timer before....")
         const start = process.hrtime.bigint();
         const modelStart = process.hrtime.bigint();
-        
+        console.log("timer started....")
         const response = await ollama.chat({
             model : "mistral",
             messages:[{role : 'user',content : prompt}]

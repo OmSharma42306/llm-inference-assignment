@@ -1,4 +1,4 @@
-import ollama from "ollama";
+import { ollama } from "../ollamaConfig.js"
 
 export async function warmup() {
   await ollama.chat({
