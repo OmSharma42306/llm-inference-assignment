@@ -1,135 +1,452 @@
-# Turborepo starter
+# 🚀 Secure & Fast Local LLM Inference Service
 
-This Turborepo starter is maintained by the Turborepo core team.
+### (Turborepo Monorepo Architecture)
 
-## Using this example
+A secure, low-latency local LLM inference API built with:
 
-Run the following command:
+* 🧠 Local LLM (Ollama / vLLM compatible)
+* 🔐 JWT Authentication
+* ⚡ Rate Limiting
+* 📊 Latency Tracking (avg + p95)
+* 🧾 Structured Logging
+* 🐳 Dockerized Deployment
+* 🧩 Turborepo Monorepo Architecture
 
-```sh
-npx create-turbo@latest
-```
+---
 
-## What's inside?
+# 🏗 Monorepo Architecture
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+This project uses **Turborepo** for modular and scalable architecture.
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+.
+├── apps/
+│   └── api/                 # Express API server
+│       ├── src/
+│       │   ├── routes/
+│       │   ├── middleware/
+|       |   ├── warmup-model/
+│       │   ├── metrics-service/
+|       |   ├── connectDb.ts/
+|       |   ├── index.ts/
+│       │   ├── ollamaConfig.ts/
+|       |   ├── rateLimiter.ts/
+│     
+│
+├── packages/
+│   ├── db/                  # MongoDB models & DB logic
+│   │   └── src/
+│   │       └── userModel.ts
+│   │
+│   └── common/              # Shared utilities
+│       └── src/
+│           └── validation.ts
+│
+├── package.json
+├── Dockerfile
+├── turbo.json
+└── README.md
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
+
+# 🧩 Package Responsibilities
+
+## 📦 `apps/api`
+
+Main backend service:
+
+* REST API routes
+* Authentication middleware
+* Rate limiting
+* Latency measurement
+* Logging
+* LLM integration (Ollama)
+
+---
+
+## 📦 `packages/db`
+
+Contains:
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+packages/db/src/userModel.ts
 ```
 
-### Develop
+Responsibilities:
 
-To develop all apps and packages, run the following command:
+* MongoDB connection logic
+* User schema definition
+* User-related DB operations
 
-```
-cd my-turborepo
+This keeps DB logic isolated from API logic.
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+---
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+## 📦 `packages/common`
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Contains:
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+packages/common/src/validation.ts
 ```
 
-### Remote Caching
+Responsibilities:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+* Zod/Joi validation schemas
+* Request body validation
+* Shared types/utilities
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+This ensures:
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+* DRY validation logic
+* Clean separation of concerns
+* Reusable validation across services
 
-```
-cd my-turborepo
+---
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+# 🧠 How Everything Connects
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+Client
+   │
+   ▼
+apps/api
+   │
+   ├── uses → packages/common (validation)
+   ├── uses → packages/db (User Model)
+   │
+   ▼
+Local LLM (Ollama)
 ```
 
-## Useful Links
+Monorepo benefit:
 
-Learn more about the power of Turborepo:
+* Clean boundaries
+* Reusable packages
+* Scalable to multiple services
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+
+# 🛠 Local Development Setup
+
+---
+
+## 1️⃣ Install Dependencies (root)
+
+```bash
+npm install
+```
+
+Turborepo will link internal packages automatically.
+
+---
+
+## 2️⃣ Start MongoDB
+
+```bash
+docker run -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=supersecret \
+  -p 27017:27017 \
+  -v mongo-data:/data/db \
+  -d mongodb/mongodb-community-server:latest
+```
+
+---
+
+## 3️⃣ Install & Start Ollama
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama run mistral
+```
+
+Keep Ollama running at:
+
+```
+http://localhost:11434
+```
+
+---
+
+## 4️⃣ Create `.env` inside `apps/api`
+
+```
+MONGOOSE_URL=mongodb://admin:supersecret@localhost:27017/mydb?authSource=admin
+jwt_secret=mySecretjwt
+OLLAMA_HOST=http://localhost:11434
+PORT=8000
+```
+
+---
+
+## 5️⃣ Run API via Turborepo
+
+From root:
+
+```bash
+npx turbo run dev --filter=api
+```
+
+Server runs at:
+
+```
+http://localhost:8000
+```
+
+---
+
+# 🐳 Docker Setup (Monorepo-Aware)
+
+Because this is a monorepo, Docker builds only `apps/api` but installs workspace dependencies.
+
+---
+
+## Step 1 — Build Image (from root)
+
+```bash
+docker build -t inference-service .
+```
+
+---
+
+## Step 2 — Run MongoDB
+
+```bash
+docker run -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=supersecret \
+  -p 27017:27017 \
+  -v mongo-data:/data/db \
+  -d mongodb/mongodb-community-server:latest
+```
+
+---
+
+## Step 3 — Run API Container
+
+```bash
+docker run \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_HOST=http://host.docker.internal:11434 \
+  -e MONGOOSE_URL='mongodb://admin:supersecret@host.docker.internal:27017/mydb?authSource=admin' \
+  -e jwt_secret=mySecretjwt \
+  -p 8000:8000 \
+  inference-service
+```
+
+---
+
+# 🔐 Authentication Flow
+
+---
+
+## 📝 Sign Up
+
+`POST /user/signup`
+
+```json
+{
+  "name": "Om Sharma",
+  "email": "omsharma.8e31@gmail.com",
+  "password": "Password@042"
+}
+```
+
+Response:
+
+```json
+{
+  "msg": "SignUp Successful! Log in.."
+}
+```
+
+---
+
+## 🔑 Sign In
+
+`POST /user/signin`
+
+```json
+{
+  "email": "omsharma.8e31@gmail.com",
+  "password": "Password@042"
+}
+```
+
+Response:
+
+```json
+{
+  "authToken": "<JWT_TOKEN>",
+  "msg": "Login Successful!"
+}
+```
+
+---
+
+# 🚀 Inference Endpoint
+
+`POST /inference/v1/infer`
+
+```bash
+curl -X POST http://localhost:8000/inference/v1/infer \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Give me a short story about AI and trust."}'
+```
+
+Response:
+
+```json
+{
+  "msg": "...generated text...",
+  "latency": {
+    "totalMs": 3705.11,
+    "modelMs": 3705.11,
+    "overheadMs": 0.0007
+  }
+}
+```
+
+---
+
+# 📊 Metrics Endpoint
+
+`GET /metrics`
+
+```json
+{
+  "totalRequests": 4,
+  "avgLatency": 3690.69,
+  "p95Latency": 4020.77
+}
+```
+
+---
+
+# 📈 Latency Design
+
+Each request tracks:
+
+| Metric     | Description         |
+| ---------- | ------------------- |
+| totalMs    | Full request time   |
+| modelMs    | LLM inference time  |
+| overheadMs | API processing time |
+
+Goal:
+
+```
+API overhead < 300ms
+```
+
+Current logs show:
+
+```
+overheadMs ≈ ~0.002ms
+```
+
+Extremely optimized request handling.
+
+---
+
+# 🧾 Structured Logging
+
+Each inference logs:
+
+```json
+{
+  "userId": "69a40f095136ced07b62568c",
+  "promptLength": 35,
+  "totalMs": 3705.11,
+  "modelMs": 3705.11,
+  "overheadMs": 0.0007,
+  "status": "success"
+}
+```
+
+Logged data includes:
+
+* User ID
+* Prompt length
+* Latency breakdown
+* Success/failure status
+
+---
+
+# 🛡 Security Measures
+
+* JWT expiry enforced
+* Middleware-based authentication
+* Rate limiting (10 requests/min per user)
+* Validation via shared `packages/common`
+* DB logic isolated in `packages/db`
+* Structured error handling
+
+Invalid token → `401 Unauthorized`
+
+---
+
+# 🎯 Why Monorepo?
+
+Using Turborepo allows:
+
+* Clear separation of concerns
+* Shared validation logic
+* Scalable multi-service architecture
+* Independent package builds
+* Faster incremental builds
+
+Future scaling example:
+
+```
+apps/
+  api/
+  worker/
+  admin-panel/
+
+packages/
+  db/
+  common/
+  auth/
+  logger/
+```
+
+---
+
+# 📌 Future Improvements
+
+* Streaming token generation
+* Redis caching layer
+* Prometheus metrics export
+* GPU vLLM integration
+* Model warmup on boot
+* Distributed inference scaling
+
+---
+
+# 🧠 Evaluation Mapping
+
+| Criteria          | Implementation                     |
+| ----------------- | ---------------------------------- |
+| Authentication    | JWT with expiry + middleware       |
+| Latency           | Measured & separated               |
+| Model Integration | Local LLM via Ollama               |
+| Code Quality      | Monorepo modular architecture      |
+| Deployment        | Dockerized                         |
+| Monitoring        | Structured logs + metrics endpoint |
+
+---
+
+# ✨ Summary
+
+This project demonstrates:
+
+* Secure API design
+* Local LLM integration
+* Low-latency request handling
+* Production-ready monorepo architecture
+* Observability and performance tracking
+* Docker reproducibility
+
+
